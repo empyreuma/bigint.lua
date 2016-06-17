@@ -5,40 +5,40 @@ This code is released under the 3-Clause BSD License.
 
 bignum.lua is a library that attempts to remove the restrictions on number size
 built into vanilla Lua. In order to achieve this, all numbers using operations
-that this library provides must first be passed through the serialize(num)
+that this library provides must first be passed through the bigint.new(num)
 function, which converts the number into a table in which every index is a
 single digit:
 
-  serialize(132) -> [ 1.0, 3.0, 2.0 ]
+  bigint.new(132) -> [ 1.0, 3.0, 2.0 ]
 
 To simplify the documentation, serialized strings will, from here on out, be
 referred to as being of the imaginary type "big".
 
-Strings can also be passed into this function bigint.if the number to be serialized is
-already too big to exist in lua (inf):
+Strings can also be passed into this function. if the number to be serialized is
+already too big to exist in lua (inf), you can pass it as a string:
 
-  serialize("132") -> [ 1.0, 3.0, 2.0 ]
+  bigint.new("132") -> [ 1.0, 3.0, 2.0 ]
 
 To convert a big back into a number, use the unserialize() function:
 
-  big = serialize("5880")
-  unserialize(big) -> 5880
+  big = bigint.new("5880")
+  bigint.unserialize(big) -> 5880
 
 Supported operations:
-  check - Check if a variable's "type" is big - can be used internally on all
-    operations if the "strict" variable below is set to true
-  serialize
-  unserialize
-  compare
-  add
+  bigint.new
+  bigint.check - Check if a variable's "type" is big - can be forced internally
+    on all operations if the "strict" variable below is set to true
+  bigint.unserialize
+  bigint.compare
+  bigint.add
 
-Planned operations:
-  random
-  subtract
-  multiply
-  power
-  divide
-  modulus
+TODO:
+  bigint.subtract
+  bigint.random
+  bigint.multiply
+  bigint.power
+  bigint.divide
+  bigint.modulus
 
 For more detailed documentation, scroll down. The operations appear in the order
 that they are listed above.
@@ -80,10 +80,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
 local bigint = {}
+bigint.__index = bigint
 
--- Create a new big
-function bigint.new()
-    return {}
+-- Create a new bigint or convert a number or string into a big
+function bigint.new(num)
+    local self = {
+        sign = "+",
+        digits = {}
+    }
+    if num then
+        local num_string = tostring(num)
+        for digit in string.gmatch(num_string, "[0-9]") do
+            table.insert(self.digits, tonumber(digit))
+        end
+        if string.sub(num_string, 1, 1) == "-" then
+            self.sign = "-"
+        end
+    end
+    return self
 end
 
 -- Check the type of a big
@@ -91,7 +105,8 @@ end
 -- forced by supplying "true" as the second argument.
 function bigint.check(big, force)
     if (strict or force) then
-        for _, digit in pairs(big) do
+        assert(type(big.sign) == "string", "bigint is unsigned")
+        for _, digit in pairs(big.digits) do
             assert(type(digit) == "number", digit .. " is not a number")
             assert(digit < 10, digit .. " is greater than or equal to 10")
         end
@@ -99,20 +114,14 @@ function bigint.check(big, force)
     return true
 end
 
--- Convert a number or string into a big
-function bigint.serialize(num)
-    local big = bigint.new()
-    for digit in string.gmatch(tostring(num), ".") do
-        table.insert(big, tonumber(digit))
-    end
-    return big
-end
-
 -- Convert a big to a number or string
 function bigint.unserialize(big, return_string)
     bigint.check(big)
     local num = ""
-    for _, digit in pairs(big) do
+    if big.sign == "-" then
+        num = "-"
+    end
+    for _, digit in pairs(big.digits) do
         num = num .. math.floor(digit) -- lazy way of getting rid of .0$
     end
     if return_string then
@@ -128,20 +137,21 @@ function bigint.compare(big1, big2, comparison)
     bigint.check(big1)
     bigint.check(big2)
 
-    local greater = false -- If big1 > big2
+    local greater = false -- If big1.digits > big2.digits
     local equal = false
 
-    if (#big1 > #big2) then
+    if (#big1.digits > #big2.digits) then
         greater = true
-    elseif (#big1 == #big2) then
+    elseif (#big1.digits == #big2.digits) then
         -- Walk left to right, comparing digits
-        for digit = 1, #big1 do
-            if (big1[digit] > big2[digit]) then
+        for digit = 1, #big1.digits do
+            if (big1.digits[digit] > big2.digits[digit]) then
                 greater = true
                 break
-            elseif (big2[digit] > big1[digit]) then
+            elseif (big2.digits[digit] > big1.digits[digit]) then
                 break
-            elseif (digit == #big1) and (big1[digit] == big2[digit]) then
+            elseif (digit == #big1.digits)
+                   and (big1.digits[digit] == big2.digits[digit]) then
                 equal = true
             end
         end
@@ -162,25 +172,27 @@ function bigint.compare(big1, big2, comparison)
         or false
 end
 
--- Add two bigs and return a big
+-- BACKEND: add two bigs and return a big, ignoring the sign
+-- TODO: frontend add function that subtracts if the signs are different then
+-- applies the correct sign
 function bigint.add(big1, big2)
     bigint.check(big1)
     bigint.check(big2)
 
     local max_digits = 0
-    local result = {}
+    local result = bigint.new()
     local carry = 0
 
-    if (#big1 >= #big2) then
-        max_digits = #big1
+    if (#big1.digits >= #big2.digits) then
+        max_digits = #big1.digits
     else
-        max_digits = #big2
+        max_digits = #big2.digits
     end
 
     -- Walk backwards right to left, like in long addition
     for digit = 0, max_digits - 1 do
-        local sum = (big1[#big1 - digit] or 0)
-                  + (big2[#big2 - digit] or 0)
+        local sum = (big1.digits[#big1.digits - digit] or 0)
+                  + (big2.digits[#big2.digits - digit] or 0)
                   + carry
 
         if (sum >= 10) then
@@ -190,12 +202,12 @@ function bigint.add(big1, big2)
             carry = 0
         end
 
-        result[max_digits - digit] = sum
+        result.digits[max_digits - digit] = sum
     end
 
-    -- Leftover carry in cases when #big1 == #big2 and sum > 10, ex. 7 + 9
+    -- Leftover carry in cases when #big1.digits == #big2.digits and sum > 10, ex. 7 + 9
     if carry == 1 then
-        table.insert(result, 1, 1)
+        table.insert(result.digits, 1, 1)
     end
 
     return result

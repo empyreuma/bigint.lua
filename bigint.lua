@@ -1,85 +1,10 @@
 #!/usr/bin/env lua
---[[
-
-This code is released under the 3-Clause BSD License.
-
-bigint.lua is a library that attempts to remove the restrictions on number size
-built into vanilla Lua. In order to achieve this, all numbers using operations
-that this library provides must first be passed through the bigint.new(num)
-function, which converts the number into a table in which every index is a
-single digit:
-
-  bigint.new(132) -> [ 1.0, 3.0, 2.0 ]
-
-To simplify the documentation, serialized strings will, from here on out, be
-referred to as being of the imaginary type "big".
-
-Strings can also be passed into this function. if the number to be serialized is
-already too big to exist in lua (inf), you can pass it as a string:
-
-  bigint.new("132") -> [ 1.0, 3.0, 2.0 ]
-
-To convert a big back into a number, use the unserialize() function:
-
-  big = bigint.new("5880")
-  bigint.unserialize(big) -> 5880
-
-Currently, only ints are supported. Floats may be added in the future.
-
-Supported operations:
-  bigint.new(num or string)
-  bigint.check(bigint) - Check if a variable's "type" is bigint - can be forced
-    internally on all operations if the "strict" variable below is set to true
-  bigint.unserialize(bigint)
-  bigint.compare(bigint, bigint, comparison (see below))
-  bigint.add(bigint, bigint)
-
-TODO:
-  bigint.subtract
-  bigint.random
-  bigint.multiply
-  bigint.power
-  bigint.divide
-  bigint.modulus
-
-For more detailed documentation, scroll down. The operations appear in the order
-that they are listed above.
-
---]]
-
--- If this variable is true then strict type checking is performed for all
+-- If this variable is true, then strict type checking is performed for all
 -- operations. This may result in slower code, but it will allow you to catch
 -- errors and bugs earlier.
 local strict = true
 
---[[
-
-Copyright (c) Emily "empyreuma" 2016
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the <organization> nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
---]]
+-------------------------------------------------------------------------------
 
 local bigint = {}
 bigint.__index = bigint
@@ -162,6 +87,8 @@ function bigint.compare(big1, big2, comparison)
             end
         end
 
+        -- If both numbers are negative, then the requirements for greater are
+        -- reversed
         if (not equal) and (big1.sign == "-") and (big2.sign == "-") then
             greater = not greater
         end

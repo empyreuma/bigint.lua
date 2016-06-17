@@ -27,12 +27,12 @@ To convert a big back into a number, use the unserialize() function:
 Currently, only ints are supported. Floats may be added in the future.
 
 Supported operations:
-  bigint.new
-  bigint.check - Check if a variable's "type" is big - can be forced internally
-    on all operations if the "strict" variable below is set to true
-  bigint.unserialize
-  bigint.compare
-  bigint.add
+  bigint.new(num or string)
+  bigint.check(bigint) - Check if a variable's "type" is bigint - can be forced
+    internally on all operations if the "strict" variable below is set to true
+  bigint.unserialize(bigint)
+  bigint.compare(bigint, bigint, comparison (see below))
+  bigint.add(bigint, bigint)
 
 TODO:
   bigint.subtract
@@ -85,6 +85,7 @@ local bigint = {}
 bigint.__index = bigint
 
 -- Create a new bigint or convert a number or string into a big
+-- Returns an empty, positive bigint if no number or string is given
 function bigint.new(num)
     local self = {
         sign = "+",
@@ -107,6 +108,7 @@ end
 -- forced by supplying "true" as the second argument.
 function bigint.check(big, force)
     if (strict or force) then
+        assert(#big.digits > 0, "bigint is empty")
         assert(type(big.sign) == "string", "bigint is unsigned")
         for _, digit in pairs(big.digits) do
             assert(type(digit) == "number", digit .. " is not a number")
@@ -142,8 +144,10 @@ function bigint.compare(big1, big2, comparison)
     local greater = false -- If big1.digits > big2.digits
     local equal = false
 
-    if (#big1.digits > #big2.digits) then
+    if (#big1.digits > #big2.digits) or ((big1.sign == "+") and (big2.sign == "-")) then
         greater = true
+    elseif (big1.sign == "-") and (big2.sign == "+") then
+        greater = false
     elseif (#big1.digits == #big2.digits) then
         -- Walk left to right, comparing digits
         for digit = 1, #big1.digits do
@@ -156,6 +160,10 @@ function bigint.compare(big1, big2, comparison)
                    and (big1.digits[digit] == big2.digits[digit]) then
                 equal = true
             end
+        end
+
+        if (not equal) and (big1.sign == "-") and (big2.sign == "-") then
+            greater = not greater
         end
     end
 

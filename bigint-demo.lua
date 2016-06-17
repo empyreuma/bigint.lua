@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-bigint = require("bignum")
+bigint = require("bigint")
 
 math.randomseed(os.time())
 

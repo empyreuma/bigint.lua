@@ -3,7 +3,7 @@
 
 This code is released under the 3-Clause BSD License.
 
-bignum.lua is a library that attempts to remove the restrictions on number size
+bigint.lua is a library that attempts to remove the restrictions on number size
 built into vanilla Lua. In order to achieve this, all numbers using operations
 that this library provides must first be passed through the bigint.new(num)
 function, which converts the number into a table in which every index is a
@@ -23,6 +23,8 @@ To convert a big back into a number, use the unserialize() function:
 
   big = bigint.new("5880")
   bigint.unserialize(big) -> 5880
+
+Currently, only ints are supported. Floats may be added in the future.
 
 Supported operations:
   bigint.new

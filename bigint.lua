@@ -6,8 +6,7 @@ local strict = true
 
 -------------------------------------------------------------------------------
 
-local bigint = {}
-bigint.__index = bigint
+bigint = {}
 
 -- Create a new bigint or convert a number or string into a big
 -- Returns an empty, positive bigint if no number or string is given
@@ -109,10 +108,8 @@ function bigint.compare(big1, big2, comparison)
         or false
 end
 
--- BACKEND: add two bigs and return a big, ignoring the sign
--- TODO: frontend add function that subtracts if the signs are different then
--- applies the correct sign
-function bigint.add(big1, big2)
+-- BACKEND: Add big1 and big2, ignoring signs
+function bigint.add_raw(big1, big2)
     bigint.check(big1)
     bigint.check(big2)
 
@@ -149,6 +146,38 @@ function bigint.add(big1, big2)
 
     return result
 
+end
+
+-- BACKEND: Subtract big2 from big1, ignoring signs
+function bigint.subtract_raw(big1, big2)
+    -- Type checking is done by bigint.compare
+    assert(bigint.compare(big1, big2, ">"),
+           bigint.unserialize(big1, true) .. " is less than "
+           .. bigint.unserialize(big2, true))
+
+    local result = big1
+    local max_digits = #big1.digits
+    local borrow = 0
+
+    -- Logic mostly copied from bigint.add_raw --------------------------------
+    -- Walk backwards right to left, like in long subtraction
+    for digit = 0, max_digits - 1 do
+        local diff = (big1.digits[#big1.digits - digit] or 0)
+                   - (big2.digits[#big2.digits - digit] or 0)
+                   - borrow
+
+        if (diff < 0) then
+            borrow = 1
+            diff = diff + 10
+        else
+            borrow = 0
+        end
+
+        result.digits[max_digits - digit] = diff
+    end
+    ---------------------------------------------------------------------------
+
+    return result
 end
 
 return bigint

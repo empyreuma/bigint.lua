@@ -4,15 +4,21 @@ that this library provides must first be passed through the bigint.new(num)
 function, which converts the number into a table in which every index is a
 single digit:
 
-    bigint.new(132) -> [ 1.0, 3.0, 2.0 ]
+    bigint.new(132) -> {
+        sign: "+",
+        digits: { 1.0, 3.0, 2.0 }
+    }
 
 To simplify the documentation, serialized strings will, from here on out, be
 referred to as being of the imaginary type "bigint".
 
-Strings can also be passed into this function. if the number to be serialized is
+Strings can also be passed into this function. If the number to be serialized is
 already too big to exist in lua (inf), you can pass it as a string:
 
-    bigint.new("132") -> [ 1.0, 3.0, 2.0 ]
+    bigint.new("132") -> {
+        sign: "+",
+        digits: { 1.0, 3.0, 2.0 }
+    }
 
 To convert a big back into a number, use the unserialize() function:
 
@@ -23,14 +29,15 @@ Currently, only ints are supported. Floats may be added in the future.
 
 Supported operations:
 * bigint.new(num or string)
-* bigint.check(bigint) - Check if a variable's "type" is bigint - can be forced
-*   internally on all operations if the "strict" variable below is set to true
+* bigint.check(bigint) - Check if a variable's "type" is bigint - can be forced 
+    internally on all operations if the "strict" variable in bigint.lua is set
+    to true (default behavior)
 * bigint.unserialize(bigint)
-* bigint.compare(bigint, bigint, comparison (see below))
-* bigint.add(bigint, bigint)
+* bigint.compare(bigint, bigint, comparison (see bigint.lua))
+* bigint.add_raw(bigint, bigint)
 
 TODO:
-* bigint.subtract
+* bigint.subtract_raw
 * bigint.random
 * bigint.multiply
 * bigint.power

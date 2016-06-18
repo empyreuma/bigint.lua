@@ -48,10 +48,10 @@ Supported operations:
     multiplies two multi-digi bigs and accounts for signs
 * bigint.random - VERY BUGGY AND MISBEHAVING RANDOM NUMBER GENERATOR!!!! DO NOT
     USE FOR IMPORTANT THINGS!!!! A BETTER ONE WILL BE CREATED AFTER MODULUS!!!!
+* bigint.power(bigint, int) - Raise a bigint to a power (positive integer powers
+    only for now)
 
 TODO:
-* bigint.multiply
-* bigint.power
 * bigint.divide
 * bigint.modulus
 

@@ -15,6 +15,13 @@ function bigint.new(num)
         sign = "+",
         digits = {}
     }
+    function self:clone()
+        local newint = bigint.new()
+        newint.sign = self.sign
+        newint.digits = self.digits
+        return newint
+    end
+
     if (num) then
         local num_string = tostring(num)
         for digit in string.gmatch(num_string, "[0-9]") do
@@ -24,6 +31,7 @@ function bigint.new(num)
             self.sign = "-"
         end
     end
+
     return self
 end
 
@@ -46,8 +54,8 @@ end
 -- value)
 function bigint.abs(big)
     bigint.check(big)
-    local result = bigint.new()
-    result.digits = big.digits
+    local result = big:clone()
+    result.sign = "+"
     return result
 end
 
@@ -166,8 +174,7 @@ function bigint.subtract_raw(big1, big2)
            "Size of " .. bigint.unserialize(big1, true) .. " is less than "
            .. bigint.unserialize(big2, true))
 
-    local result = bigint.new()
-    result.digits = big1.digits
+    local result = big1:clone()
     local max_digits = #big1.digits
     local borrow = 0
 
@@ -228,8 +235,7 @@ end
 function bigint.subtract(big1, big2)
     -- Type checking is done by bigint.compare in bigint.add
     -- Subtracting is like adding a negative
-    local big2_local = bigint.new()
-    big2_local.digits = big2.digits
+    local big2_local = big2:clone()
     if (big2.sign == "+") then
         big2_local.sign = "-"
     else
@@ -316,6 +322,30 @@ function bigint.multiply(big1, big2)
     end
 
     return result
+end
+
+
+-- Raise a big to a positive integer power (TODO: negative integer power)
+function bigint.exponentiate(big, int)
+    -- Type checking for big done by bigint.multiply
+    assert(type(int) == "number", "bigint powers are not supported")
+    assert(math.floor(int) == int, " decimal powers are not supported")
+    assert(int >= 0, " negative powers are not supported")
+
+    if (int == 0) then
+        return bigint.new(1)
+    elseif (int == 1) then
+        return big
+    else
+        local result = big:clone()
+
+        for i = 1, int - 1 do
+            result = bigint.multiply(result, big)
+        end
+
+        return result
+    end
+
 end
 
 -- VERY BUGGY!!!! FOR TESTING PURPOSES ONLY!!! A BETTER GENERATOR TO COME SOON!!

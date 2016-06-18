@@ -15,7 +15,7 @@ function bigint.new(num)
         sign = "+",
         digits = {}
     }
-    if num then
+    if (num) then
         local num_string = tostring(num)
         for digit in string.gmatch(num_string, "[0-9]") do
             table.insert(self.digits, tonumber(digit))
@@ -77,10 +77,11 @@ function bigint.compare(big1, big2, comparison)
     local greater = false -- If big1.digits > big2.digits
     local equal = false
 
-    if (#big1.digits > #big2.digits) or ((big1.sign == "+") and (big2.sign == "-")) then
-        greater = true
-    elseif (big1.sign == "-") and (big2.sign == "+") then
+    if (big1.sign == "-") and (big2.sign == "+") then
         greater = false
+    elseif (#big1.digits > #big2.digits)
+    or ((big1.sign == "+") and (big2.sign == "-")) then
+        greater = true
     elseif (#big1.digits == #big2.digits) then
         -- Walk left to right, comparing digits
         for digit = 1, #big1.digits do
@@ -95,11 +96,12 @@ function bigint.compare(big1, big2, comparison)
             end
         end
 
-        -- If both numbers are negative, then the requirements for greater are
-        -- reversed
-        if (not equal) and (big1.sign == "-") and (big2.sign == "-") then
-            greater = not greater
-        end
+    end
+
+    -- If both numbers are negative, then the requirements for greater are
+    -- reversed
+    if (not equal) and (big1.sign == "-") and (big2.sign == "-") then
+        greater = not greater
     end
 
     return (((comparison == "<") or (comparison == "lt"))
@@ -160,11 +162,12 @@ end
 -- BACKEND: Subtract big2 from big1, ignoring signs
 function bigint.subtract_raw(big1, big2)
     -- Type checking is done by bigint.compare
-    assert(bigint.compare(bigint.abs(big1), bigint.abs(big2), ">"),
+    assert(bigint.compare(bigint.abs(big1), bigint.abs(big2), ">="),
            "Size of " .. bigint.unserialize(big1, true) .. " is less than "
            .. bigint.unserialize(big2, true))
 
-    local result = big1
+    local result = bigint.new()
+    result.digits = big1.digits
     local max_digits = #big1.digits
     local borrow = 0
 
@@ -186,6 +189,12 @@ function bigint.subtract_raw(big1, big2)
     end
     ---------------------------------------------------------------------------
 
+
+    -- Strip leading zero if any, but not if 0 is the only digit
+    if (#result.digits > 1) and (result.digits[1] == 0) then
+        table.remove(result.digits, 1)
+    end
+
     return result
 end
 
@@ -200,10 +209,10 @@ function bigint.add(big1, big2)
     if (big1.sign ~= big2.sign) then
         if (bigint.compare(bigint.abs(big1), bigint.abs(big2), ">")) then
             result = bigint.subtract_raw(big1, big2)
-            sign = big1.sign
+            result.sign = big1.sign
         else
             result = bigint.subtract_raw(big2, big1)
-            sign = big2.sign
+            result.sign = big2.sign
         end
 
     elseif (big1.sign == "+") and (big2.sign == "+") then
@@ -217,14 +226,63 @@ function bigint.add(big1, big2)
     return result
 end
 function bigint.subtract(big1, big2)
-    -- Type checking is done by bigint.subtract_raw
+    -- Type checking is done by bigint.compare in bigint.add
     -- Subtracting is like adding a negative
+    local big2_local = bigint.new()
+    big2_local.digits = big2.digits
     if (big2.sign == "+") then
-        big2.sign = "-"
+        big2_local.sign = "-"
     else
-        big2.sign = "+"
+        big2_local.sign = "+"
     end
-    return bigint.add(big1, big2)
+    return bigint.add(big1, big2_local)
+end
+
+-- VERY BUGGY!!!! FOR TESTING PURPOSES ONLY!!! A BETTER GENERATOR TO COME SOON!!
+-- Generate a random bigint using lua's math.random() random number generator
+-- big2 is optional, just like with math.random()
+function bigint.random(big1, big2)
+    if (big2) then
+        -- Type checking is done by bigint.compare
+        assert(bigint.compare(big1, big2, "<"),
+               bigint.unserialize(big1) .. " is greater than or equal to " ..
+               bigint.unserialize(big2))
+
+        local result = bigint.new()
+        local range
+
+        -- Find the difference between big1 and big2
+        -- Sign can be ignored for now since we are only operating on digits
+        if (big1.sign == "-") and (big2.sign == "-") then
+            range = bigint.subtract(big1, big2)
+        else
+            range = bigint.subtract(big2, big1)
+        end
+
+        -- Generate a random bigint between 0 and the range
+        for digit = 1, #range.digits do
+            local max = range.digits[digit]
+            if (max == 0) then
+                max = 9
+            end
+            result.digits[digit] = math.random(0, max)
+        end
+
+        -- Strip leading zero if any, but not if 0 is the only digit
+        if (#result.digits > 1) and (result.digits[1] == 0) then
+            table.remove(result.digits, 1)
+        end
+
+        -- Bring the result back between big1 and big2
+        result = bigint.add(result, big1)
+        if (big1.sign == "-") and (big2.sign == "-") then
+            result = bigint.add(result, big2)
+        end
+
+        return result
+    else
+        return bigint.random(bigint.new(1), big1)
+    end
 end
 
 return bigint

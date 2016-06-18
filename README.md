@@ -33,18 +33,19 @@ Supported operations:
     internally on all operations if the "strict" variable in bigint.lua is set
     to true (default behavior)
 * bigint.abs(bigint) - Create a new, positive bigint with the same digits
-* bigint.unserialize(bigint, as\_string) - Convert a bigint into to a number or
-    a string
-* bigint.compare(bigint, bigint, comparison (see bigint.lua))
+* bigint.unserialize(bigint, bool as\_string) - Convert a bigint into to a number
+    or a string
+* bigint.compare(bigint, bigint, string comparison (see bigint.lua))
 * bigint.add\_raw(bigint, bigint) - Addition operation used internally that
     ignores signs
 * bigint.subtract\_raw(bigint, bigint) - Subtraction operation used internally
     that ignores signs
 * bigint.add(bigint, bigint) - Normal addition, accounting for signs
 * bigint.subtract(bigint, bigint) - Normal subtraction, accounting for signs
+* bigint.random - VERY BUGGY AND MISBEHAVING RANDOM NUMBER GENERATOR!!!! DO NOT
+    USE FOR IMPORTANT THINGS!!!! A BETTER ONE WILL BE CREATED AFTER MODULUS!!!!
 
 TODO:
-* bigint.random
 * bigint.multiply
 * bigint.power
 * bigint.divide

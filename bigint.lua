@@ -42,8 +42,17 @@ function bigint.check(big, force)
     return true
 end
 
+-- Create a new big with the same digits but with a positive sign (absolute
+-- value)
+function bigint.abs(big)
+    bigint.check(big)
+    local result = bigint.new()
+    result.digits = big.digits
+    return result
+end
+
 -- Convert a big to a number or string
-function bigint.unserialize(big, return_string)
+function bigint.unserialize(big, as_string)
     bigint.check(big)
     local num = ""
     if big.sign == "-" then
@@ -52,7 +61,7 @@ function bigint.unserialize(big, return_string)
     for _, digit in pairs(big.digits) do
         num = num .. math.floor(digit) -- lazy way of getting rid of .0$
     end
-    if return_string then
+    if as_string then
         return num
     else
         return tonumber(num)
@@ -151,8 +160,8 @@ end
 -- BACKEND: Subtract big2 from big1, ignoring signs
 function bigint.subtract_raw(big1, big2)
     -- Type checking is done by bigint.compare
-    assert(bigint.compare(big1, big2, ">"),
-           bigint.unserialize(big1, true) .. " is less than "
+    assert(bigint.compare(bigint.abs(big1), bigint.abs(big2), ">"),
+           "Size of " .. bigint.unserialize(big1, true) .. " is less than "
            .. bigint.unserialize(big2, true))
 
     local result = big1
@@ -178,6 +187,44 @@ function bigint.subtract_raw(big1, big2)
     ---------------------------------------------------------------------------
 
     return result
+end
+
+-- FRONTEND: Addition and subtraction operations, accounting for signs
+function bigint.add(big1, big2)
+    -- Type checking is done by bigint.compare
+
+    local result
+
+    -- If adding numbers of different sign, subtract the smaller sized one from
+    -- the bigger sized one and take the sign of the bigger sized one
+    if (big1.sign ~= big2.sign) then
+        if (bigint.compare(bigint.abs(big1), bigint.abs(big2), ">")) then
+            result = bigint.subtract_raw(big1, big2)
+            sign = big1.sign
+        else
+            result = bigint.subtract_raw(big2, big1)
+            sign = big2.sign
+        end
+
+    elseif (big1.sign == "+") and (big2.sign == "+") then
+        result = bigint.add_raw(big1, big2)
+
+    elseif (big1.sign == "-") and (big2.sign == "-") then
+        result = bigint.add_raw(big1, big2)
+        result.sign = "-"
+    end
+
+    return result
+end
+function bigint.subtract(big1, big2)
+    -- Type checking is done by bigint.subtract_raw
+    -- Subtracting is like adding a negative
+    if (big2.sign == "+") then
+        big2.sign = "-"
+    else
+        big2.sign = "+"
+    end
+    return bigint.add(big1, big2)
 end
 
 return bigint

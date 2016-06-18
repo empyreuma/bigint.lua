@@ -4,9 +4,9 @@
 -- errors and bugs earlier.
 local strict = true
 
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
-bigint = {}
+local bigint = {}
 
 -- Create a new bigint or convert a number or string into a big
 -- Returns an empty, positive bigint if no number or string is given
@@ -124,8 +124,8 @@ function bigint.add_raw(big1, big2)
     bigint.check(big1)
     bigint.check(big2)
 
-    local max_digits = 0
     local result = bigint.new()
+    local max_digits = 0
     local carry = 0
 
     if (#big1.digits >= #big2.digits) then
@@ -151,7 +151,7 @@ function bigint.add_raw(big1, big2)
     end
 
     -- Leftover carry in cases when #big1.digits == #big2.digits and sum > 10, ex. 7 + 9
-    if carry == 1 then
+    if (carry == 1) then
         table.insert(result.digits, 1, 1)
     end
 
@@ -171,7 +171,7 @@ function bigint.subtract_raw(big1, big2)
     local max_digits = #big1.digits
     local borrow = 0
 
-    -- Logic mostly copied from bigint.add_raw --------------------------------
+    -- Logic mostly copied from bigint.add_raw ---------------------------------
     -- Walk backwards right to left, like in long subtraction
     for digit = 0, max_digits - 1 do
         local diff = (big1.digits[#big1.digits - digit] or 0)
@@ -187,7 +187,7 @@ function bigint.subtract_raw(big1, big2)
 
         result.digits[max_digits - digit] = diff
     end
-    ---------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
 
 
     -- Strip leading zero if any, but not if 0 is the only digit
@@ -236,6 +236,86 @@ function bigint.subtract(big1, big2)
         big2_local.sign = "+"
     end
     return bigint.add(big1, big2_local)
+end
+
+-- BACKEND: Multiply a big by a single digit big, ignoring signs
+function bigint.multiply_single(big1, big2)
+    bigint.check(big1)
+    bigint.check(big2)
+    assert(#big2.digits == 1, bigint.unserialize(big2)
+                              .. " has more than one digit")
+
+    local result = bigint.new()
+    local carry = 0
+
+    -- Logic mostly copied from bigint.add_raw ---------------------------------
+    -- Walk backwards right to left, like in long multiplication
+    for digit = 0, #big1.digits - 1 do
+        local this_digit = big1.digits[#big1.digits - digit]
+                         * big2.digits[1]
+                         + carry
+
+        if (this_digit >= 10) then
+            carry = math.floor(this_digit / 10)
+            this_digit = this_digit - (carry * 10)
+        else
+            carry = 0
+        end
+
+        result.digits[#big1.digits - digit] = this_digit
+    end
+
+    -- Leftover carry in cases when big1.digits[1] * big2.digits[1] > 0
+    if (carry > 0) then
+        table.insert(result.digits, 1, carry)
+    end
+    ----------------------------------------------------------------------------
+
+    return result
+end
+
+-- FRONTEND: Multiply two bigs, accounting for signs
+function bigint.multiply(big1, big2)
+    -- Type checking done by bigint.multiply_single
+
+    local result = bigint.new(0)
+    local larger, smaller -- Larger and smaller in terms of digits, not size
+
+    if (bigint.unserialize(big1) == 0) or (bigint.unserialize(big2) == 0) then
+        return result
+    end
+
+    if (#big1.digits >= #big2.digits) then
+        larger = big1
+        smaller = big2
+    else
+        larger = big2
+        smaller = big1
+    end
+
+    -- Walk backwards right to left, like in long multiplication
+    for digit = 0, #smaller.digits - 1 do
+        -- Sorry for going over column 80! There's lots of big names here
+        local this_digit_product = bigint.multiply_single(larger,
+                                                          bigint.new(smaller.digits[#smaller.digits - digit]))
+
+        -- "Placeholding zeroes"
+        if (digit > 0) then
+            for placeholder = 1, digit do
+                table.insert(this_digit_product.digits, 0)
+            end
+        end
+
+        result = bigint.add(result, this_digit_product)
+    end
+
+    if (larger.sign == smaller.sign) then
+        result.sign = "+"
+    else
+        result.sign = "-"
+    end
+
+    return result
 end
 
 -- VERY BUGGY!!!! FOR TESTING PURPOSES ONLY!!! A BETTER GENERATOR TO COME SOON!!

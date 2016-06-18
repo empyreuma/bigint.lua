@@ -36,12 +36,16 @@ Supported operations:
 * bigint.unserialize(bigint, bool as\_string) - Convert a bigint into to a number
     or a string
 * bigint.compare(bigint, bigint, string comparison (see bigint.lua))
-* bigint.add\_raw(bigint, bigint) - Addition operation used internally that
+* bigint.add\_raw(bigint, bigint) - Backend addition operation that ignores
+    signs
+* bigint.subtract\_raw(bigint, bigint) - Backend subtraction operation that
     ignores signs
-* bigint.subtract\_raw(bigint, bigint) - Subtraction operation used internally
-    that ignores signs
-* bigint.add(bigint, bigint) - Normal addition, accounting for signs
-* bigint.subtract(bigint, bigint) - Normal subtraction, accounting for signs
+* bigint.add(bigint, bigint) - Frontend addition, accounting for signs
+* bigint.subtract(bigint, bigint) - Frontend subtraction, accounting for signs
+* bigint.multiply_single(bigint, bigint) - Backend multiplication operation that
+    multiplies a multi-digit big by a single digit and ignores signs
+* bigint.multiply(bigint, bigint) - Frontend multiplication operation that
+    multiplies two multi-digi bigs and accounts for signs
 * bigint.random - VERY BUGGY AND MISBEHAVING RANDOM NUMBER GENERATOR!!!! DO NOT
     USE FOR IMPORTANT THINGS!!!! A BETTER ONE WILL BE CREATED AFTER MODULUS!!!!
 

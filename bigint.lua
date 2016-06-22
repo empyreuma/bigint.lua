@@ -20,7 +20,9 @@ function bigint.new(num)
     function self:clone()
         local newint = bigint.new()
         newint.sign = self.sign
-        newint.digits = self.digits
+        for _, digit in pairs(self.digits) do
+            newint.digits[#newint.digits + 1] = digit
+        end
         return newint
     end
 
@@ -387,7 +389,7 @@ function bigint.divide_raw(big1, big2)
                 -- Find the maximum number of divisors that fit into the
                 -- dividend
                 factor = 0
-                while (bigint.compare(divisor, dividend, "<=")) do
+                while (bigint.compare(divisor, dividend, "<")) do
                     divisor = bigint.add(divisor, big2)
                     factor = factor + 1
                 end

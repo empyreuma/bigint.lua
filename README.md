@@ -60,8 +60,9 @@ Supported operations:
     same sign as the dividend, as per C standard
 
 TODO:
-* bigint.extra library to extend the standard bigint library with extra things
-    like pseudorandom number generation
+* bigint.eval - Evaluate an expression, following the order of operations
+* bigint-extra.lua library to extend the standard bigint library with extra
+    things like pseudorandom number generation
 
 For more detailed documentation, see bigint.lua. The operations appear in the
 order that they are listed above.

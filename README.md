@@ -48,8 +48,8 @@ Supported operations:
     multiplies two multi-digi bigs and accounts for signs
 * bigint.random - VERY BUGGY AND MISBEHAVING RANDOM NUMBER GENERATOR!!!! DO NOT
     USE FOR IMPORTANT THINGS!!!! A BETTER ONE WILL BE CREATED AFTER MODULUS!!!!
-* bigint.power(bigint, int) - Raise a bigint to a power (positive integer powers
-    only for now)
+* bigint.exponentiate(bigint, bigint) - Raise a bigint to a big power (positive
+    integer powers only for now)
 * bigint.divide\_raw(bigint, bigint) - DO NOT USE: Backend division operation
     that only supports positive integers, returning a result and remainder
 * bigint.divide(bigint, bigint) - Frontend division operation that accounts for

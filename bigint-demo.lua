@@ -32,7 +32,7 @@ function demo_multiply(n1, n2)
 end
 
 function demo_exponentiate(n1, n2)
-    printf("bigint.multiply(%s, %s) -> %s", tostring(n1), tostring(n2), tostring(bigint.unserialize(bigint.exponentiate(bigint.new(n1), n2), true)))
+    printf("bigint.exponentiate(%s, %s) -> %s", tostring(n1), tostring(n2), tostring(bigint.unserialize(bigint.exponentiate(bigint.new(n1), bigint.new(n2)), true)))
 end
 
 function demo_divide(n1, n2)
@@ -68,6 +68,12 @@ print("-- Add two negatives")
 demo_add(math.random(-100, 0), math.random(-100, 0))
 print("-- Add a negative and a positive")
 demo_add(math.random(-100, 0), math.random(100))
+print()
+
+print("-- Raise a positive to a power")
+demo_exponentiate(math.random(100), math.random(100))
+print("-- Raise a negative to a power")
+demo_exponentiate(math.random(-100, 0), math.random(100))
 print()
 
 print("-- Subtract two positives")

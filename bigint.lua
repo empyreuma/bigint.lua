@@ -327,22 +327,23 @@ function bigint.multiply(big1, big2)
 end
 
 
--- Raise a big to a positive integer power (TODO: negative integer power)
-function bigint.exponentiate(big, int)
+-- Raise a big to a positive integer or big power (TODO: negative integer power)
+function bigint.exponentiate(big, power)
     -- Type checking for big done by bigint.multiply
-    assert(type(int) == "number", "bigint powers are not supported")
-    assert(math.floor(int) == int, " decimal powers are not supported")
-    assert(int >= 0, " negative powers are not supported")
+    assert(bigint.compare(power, bigint.new(0), ">"),
+           " negative powers are not supported")
+    local exp = power:clone()
 
-    if (int == 0) then
+    if (bigint.compare(exp, bigint.new(0), "==")) then
         return bigint.new(1)
-    elseif (int == 1) then
+    elseif (bigint.compare(exp, bigint.new(1), "==")) then
         return big
     else
         local result = big:clone()
 
-        for i = 1, int - 1 do
+        while (bigint.compare(exp, bigint.new(1), ">")) do
             result = bigint.multiply(result, big)
+            exp = bigint.subtract(exp, bigint.new(1))
         end
 
         return result

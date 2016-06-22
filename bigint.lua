@@ -15,6 +15,8 @@ function bigint.new(num)
         sign = "+",
         digits = {}
     }
+
+    -- Return a new bigint with the same sign and digits
     function self:clone()
         local newint = bigint.new()
         newint.sign = self.sign
@@ -50,7 +52,7 @@ function bigint.check(big, force)
     return true
 end
 
--- Create a new big with the same digits but with a positive sign (absolute
+-- Return a new big with the same digits but with a positive sign (absolute
 -- value)
 function bigint.abs(big)
     bigint.check(big)
@@ -113,9 +115,9 @@ function bigint.compare(big1, big2, comparison)
     end
 
     return (((comparison == "<") or (comparison == "lt"))
-            and (not greater) and true)
+            and ((not greater) and (not equal)) and true)
         or (((comparison == ">") or (comparison == "gt"))
-            and (greater) and true)
+            and ((greater) and (not equal)) and true)
         or (((comparison == "==") or (comparison == "eq"))
             and (equal) and true)
         or (((comparison == ">=") or (comparison == "ge"))
@@ -197,8 +199,8 @@ function bigint.subtract_raw(big1, big2)
     ----------------------------------------------------------------------------
 
 
-    -- Strip leading zero if any, but not if 0 is the only digit
-    if (#result.digits > 1) and (result.digits[1] == 0) then
+    -- Strip leading zeroes if any, but not if 0 is the only digit
+    while (#result.digits > 1) and (result.digits[1] == 0) do
         table.remove(result.digits, 1)
     end
 
@@ -346,6 +348,91 @@ function bigint.exponentiate(big, int)
         return result
     end
 
+end
+
+-- BACKEND: Divide two bigs (decimals not supported), returning big result and
+-- big remainder
+-- WARNING: Only supports positive integers
+function bigint.divide_raw(big1, big2)
+    -- Type checking done by bigint.compare
+    if (bigint.compare(big1, big2, "==")) then
+        return bigint.new(1), bigint.new(0)
+    elseif (bigint.compare(big1, big2, "<")) then
+        return bigint.new(0), bigint.new(0)
+    else
+        assert(bigint.compare(big2, bigint.new(0), "!="), "error: divide by zero")
+        assert(big1.sign == "+", "error: big1 is not positive")
+        assert(big2.sign == "+", "error: big2 is not positive")
+
+        local result = bigint.new()
+
+        local dividend = bigint.new() -- Dividend of a single operation, not the
+                                      -- dividend of the overall function
+        local divisor = big2:clone()
+        local factor = 1
+
+        -- Walk left to right among digits in the dividend, like in long
+        -- division
+        for _, digit in pairs(big1.digits) do
+            dividend.digits[#dividend.digits + 1] = digit
+
+            -- The dividend is smaller than the divisor, so a zero is appended
+            -- to the result and the loop ends
+            if (bigint.compare(dividend, divisor, "<")) then
+                if (#result.digits > 0) then -- Don't add leading zeroes
+                    result.digits[#result.digits + 1] = 0
+                end
+            else
+                -- Find the maximum number of divisors that fit into the
+                -- dividend
+                factor = 0
+                while (bigint.compare(divisor, dividend, "<=")) do
+                    divisor = bigint.add(divisor, big2)
+                    factor = factor + 1
+                end
+
+                -- Append the factor to the result
+                result.digits[#result.digits + 1] = factor
+
+                -- Subtract the divisor from the dividend to obtain the
+                -- remainder, which is the new dividend for the next loop
+                dividend = bigint.subtract(dividend,
+                                           bigint.subtract(divisor, big2))
+
+                -- Reset the divisor
+                divisor = big2:clone()
+            end
+
+        end
+
+        -- The remainder of the final loop is returned as the function's
+        -- overall remainder
+        return result, dividend
+    end
+end
+
+-- FRONTEND: Divide two bigs (decimals not supported), returning big result and
+-- big remainder, accounting for signs
+function bigint.divide(big1, big2)
+    local result, remainder = bigint.divide_raw(bigint.abs(big1),
+                                                bigint.abs(big2))
+    if (big1.sign == big2.sign) then
+        result.sign = "+"
+    else
+        result.sign = "-"
+    end
+
+    return result, remainder
+end
+
+-- FRONTEND: Return only the remainder from bigint.divide
+function bigint.modulus(big1, big2)
+    local result, remainder = bigint.divide(big1, big2)
+
+    -- Remainder will always have the same sign as the dividend per C standard
+    -- https://en.wikipedia.org/wiki/Modulo_operation#Remainder_calculation_for_the_modulo_operation
+    remainder.sign = big1.sign
+    return remainder
 end
 
 -- VERY BUGGY!!!! FOR TESTING PURPOSES ONLY!!! A BETTER GENERATOR TO COME SOON!!

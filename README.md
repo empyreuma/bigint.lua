@@ -42,7 +42,7 @@ Supported operations:
     ignores signs
 * bigint.add(bigint, bigint) - Frontend addition, accounting for signs
 * bigint.subtract(bigint, bigint) - Frontend subtraction, accounting for signs
-* bigint.multiply_single(bigint, bigint) - Backend multiplication operation that
+* bigint.multiply\_single(bigint, bigint) - Backend multiplication operation that
     multiplies a multi-digit big by a single digit and ignores signs
 * bigint.multiply(bigint, bigint) - Frontend multiplication operation that
     multiplies two multi-digi bigs and accounts for signs
@@ -50,10 +50,18 @@ Supported operations:
     USE FOR IMPORTANT THINGS!!!! A BETTER ONE WILL BE CREATED AFTER MODULUS!!!!
 * bigint.power(bigint, int) - Raise a bigint to a power (positive integer powers
     only for now)
+* bigint.divide\_raw(bigint, bigint) - DO NOT USE: Backend division operation
+    that only supports positive integers, returning a result and remainder
+* bigint.divide(bigint, bigint) - Frontend division operation that accounts for
+    signs and translates arguments into their absolute values for use in
+    bigint.divide\_raw(), returning a result and remainder
+* bigint.modulus - Frontend for the already frontend bigint.divide() function
+    that only returns the remainder and makes sure that the remainder has the
+    same sign as the dividend, as per C standard
 
 TODO:
-* bigint.divide
-* bigint.modulus
+* bigint.extra library to extend the standard bigint library with extra things
+    like pseudorandom number generation
 
 For more detailed documentation, see bigint.lua. The operations appear in the
 order that they are listed above.

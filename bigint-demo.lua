@@ -2,6 +2,7 @@
 -- Sorry for how ugly this script is! It's not really meant to be maintained.
 
 local bigint = require("bigint")
+local bigint_extra = require("bigint-extra")
 local comparisons = {">", "<", "==", "~=", ">=", "<="}
 
 math.randomseed(os.time())
@@ -109,6 +110,12 @@ print("-- Divide a negative and a positive")
 demo_divide(math.random(-10000, 0), math.random(100))
 print("-- (Cannot demo divide by zero because of assertion failure)")
 print()
+
+print("-- Generate very large random numbers")
+print(bigint.unserialize(bigint_extra.random(bigint.new("1000000000000000000000000000000000000000000000000")), true))
+print(bigint.unserialize(bigint_extra.random(bigint.new("1000000000000000000000000000000000000000000000000")), true))
+print(bigint.unserialize(bigint_extra.random(bigint.new("1000000000000000000000000000000000000000000000000")), true))
+print(bigint.unserialize(bigint_extra.random(bigint.new("1000000000000000000000000000000000000000000000000")), true))
 --[[
 print("BUGGY RANDOM NUMBER GENERATOR")
 print("-- Generate a random positive with one argument")

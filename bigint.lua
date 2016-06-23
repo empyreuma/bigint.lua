@@ -395,7 +395,14 @@ function bigint.divide_raw(big1, big2)
                 end
 
                 -- Append the factor to the result
-                result.digits[#result.digits + 1] = factor
+                if (factor == 10) then
+                    -- Fixes a weird bug that introduces a new bug if fixed by
+                    -- changing the comparison in the while loop to "<="
+                    result.digits[#result.digits] = 1
+                    result.digits[#result.digits + 1] = 0
+                else
+                    result.digits[#result.digits + 1] = factor
+                end
 
                 -- Subtract the divisor from the dividend to obtain the
                 -- remainder, which is the new dividend for the next loop
@@ -436,53 +443,6 @@ function bigint.modulus(big1, big2)
     -- https://en.wikipedia.org/wiki/Modulo_operation#Remainder_calculation_for_the_modulo_operation
     remainder.sign = big1.sign
     return remainder
-end
-
--- VERY BUGGY!!!! FOR TESTING PURPOSES ONLY!!! A BETTER GENERATOR TO COME SOON!!
--- Generate a random bigint using lua's math.random() random number generator
--- big2 is optional, just like with math.random()
-function bigint.random(big1, big2)
-    if (big2) then
-        -- Type checking is done by bigint.compare
-        assert(bigint.compare(big1, big2, "<"),
-               bigint.unserialize(big1) .. " is greater than or equal to " ..
-               bigint.unserialize(big2))
-
-        local result = bigint.new()
-        local range
-
-        -- Find the difference between big1 and big2
-        -- Sign can be ignored for now since we are only operating on digits
-        if (big1.sign == "-") and (big2.sign == "-") then
-            range = bigint.subtract(big1, big2)
-        else
-            range = bigint.subtract(big2, big1)
-        end
-
-        -- Generate a random bigint between 0 and the range
-        for digit = 1, #range.digits do
-            local max = range.digits[digit]
-            if (max == 0) then
-                max = 9
-            end
-            result.digits[digit] = math.random(0, max)
-        end
-
-        -- Strip leading zero if any, but not if 0 is the only digit
-        if (#result.digits > 1) and (result.digits[1] == 0) then
-            table.remove(result.digits, 1)
-        end
-
-        -- Bring the result back between big1 and big2
-        result = bigint.add(result, big1)
-        if (big1.sign == "-") and (big2.sign == "-") then
-            result = bigint.add(result, big2)
-        end
-
-        return result
-    else
-        return bigint.random(bigint.new(1), big1)
-    end
 end
 
 return bigint

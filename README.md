@@ -48,9 +48,7 @@ Supported operations in bigint.lua:
 * bigint.multiply\_single(bigint, bigint) - Backend multiplication operation that
     multiplies a multi-digit big by a single digit and ignores signs
 * bigint.multiply(bigint, bigint) - Frontend multiplication operation that
-    multiplies two multi-digi bigs and accounts for signs
-* bigint.random - VERY BUGGY AND MISBEHAVING RANDOM NUMBER GENERATOR!!!! DO NOT
-    USE FOR IMPORTANT THINGS!!!! A BETTER ONE WILL BE CREATED AFTER MODULUS!!!!
+    multiplies two multi-digit bigs and accounts for signs
 * bigint.exponentiate(bigint, bigint) - Raise a bigint to a big power (positive
     integer powers only for now)
 * bigint.divide\_raw(bigint, bigint) - DO NOT USE: Backend division operation
@@ -62,14 +60,18 @@ Supported operations in bigint.lua:
     that only returns the remainder and makes sure that the remainder has the
     same sign as the dividend, as per C standard
 
+Supported methods:
+* bigint:clone() - Return a new bigint with the same sign and digits
+
 Supported operations in bigint-extra.lua:
 * bigint\_extra.random(bigint, bigint) - Blum Blum Shub PRNG implementation that
     takes one, two, or zero arguments. Let R be all possible outputs; by
     default, arg1 <= R <= arg2. If the second argument is not given:
-    1 <= R <= arg1. If no arguments are given, 0 <= R <= 1.
+    1 <= R <= arg1. If no arguments are given, 0 <= R <= 1
 
 TODO:
 * bigint.eval - Evaluate an expression, following the order of operations
+* Maybe some other random number generators
 
 For more detailed documentation, see bigint.lua. The operations appear in the
 order that they are listed above.

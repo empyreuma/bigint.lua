@@ -10,10 +10,9 @@ ensures that the codebase of this project remains nice and consistent.
 
 STAY WITHIN 80 COLUMNS!!! Most text editors should have an option to place a
 mark on the 80th column to warn you. If you need to, put arguments or parts of
-an expression on new lines. If this is still too long, you probably have a
-problem with your naming convention. Good examples of this can be found at the
-bottom of the bigint.compare() function and in the logic part of
-bigint.add\_raw.
+an expression on new lines. Good examples of this can be found at the bottom of
+the bigint.compare() function and in the logic part of bigint.add\_raw. If this
+is still too long, you probably have a problem with your naming convention.
 
 Use four spaces instead of tabs. Spaces are necessary to align arguments, and
 using both spaces and tabs will be very messy.

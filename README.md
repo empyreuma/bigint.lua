@@ -30,35 +30,41 @@ Currently, only ints are supported. Floats may be added in the future.
 Behavior to keep in mind:
 * All operations return a new bigint 
 
-Supported operations in bigint.lua:
+Supported frontend operations in bigint.lua:
 * bigint.new(num or string) - Create a new bigint
 * bigint.check(bigint) - Check if a variable's "type" is bigint - can be forced 
     internally on all operations if the "strict" variable in bigint.lua is set
     to true (default behavior)
 * bigint.abs(bigint) - Create a new, positive bigint with the same digits
-* bigint.unserialize(bigint, bool as\_string) - Convert a bigint into to a number
-    or a string
+* bigint.unserialize(bigint, string output\_type, precision) - Convert a bigint
+    into to a number or a string. By default, the bigint will be converted into
+    a number. Other possible output types are "string" (alias "s"),
+    "human-readable" (alias "human" and "h") and "scientific" (alias "sci").
+    Precision is an integer that specifies the number of digits to be displayed
+    in human-readable or scientific output.
 * bigint.compare(bigint, bigint, string comparison (see bigint.lua))
-* bigint.add\_raw(bigint, bigint) - Backend addition operation that ignores
-    signs
-* bigint.subtract\_raw(bigint, bigint) - Backend subtraction operation that
-    ignores signs
 * bigint.add(bigint, bigint) - Frontend addition, accounting for signs
 * bigint.subtract(bigint, bigint) - Frontend subtraction, accounting for signs
-* bigint.multiply\_single(bigint, bigint) - Backend multiplication operation that
-    multiplies a multi-digit big by a single digit and ignores signs
 * bigint.multiply(bigint, bigint) - Frontend multiplication operation that
     multiplies two multi-digit bigs and accounts for signs
 * bigint.exponentiate(bigint, bigint) - Raise a bigint to a big power (positive
     integer powers only for now)
-* bigint.divide\_raw(bigint, bigint) - DO NOT USE: Backend division operation
-    that only supports positive integers, returning a result and remainder
 * bigint.divide(bigint, bigint) - Frontend division operation that accounts for
     signs and translates arguments into their absolute values for use in
     bigint.divide\_raw(), returning a result and remainder
 * bigint.modulus - Frontend for the already frontend bigint.divide() function
     that only returns the remainder and makes sure that the remainder has the
     same sign as the dividend, as per C standard
+
+Backend operations (may be useful if you need more speed):
+* bigint.add\_raw(bigint, bigint) - Backend addition operation that ignores
+    signs
+* bigint.subtract\_raw(bigint, bigint) - Backend subtraction operation that
+    ignores signs
+* bigint.multiply\_single(bigint, bigint) - Backend multiplication operation
+    that multiplies a multi-digit big by a single digit and ignores signs
+* bigint.divide\_raw(bigint, bigint) - DO NOT USE: Backend division operation
+    that only supports positive integers, returning a result and remainder
 
 Supported methods:
 * bigint:clone() - Return a new bigint with the same sign and digits

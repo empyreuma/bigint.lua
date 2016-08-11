@@ -64,19 +64,63 @@ function bigint.abs(big)
 end
 
 -- Convert a big to a number or string
-function bigint.unserialize(big, as_string)
+function bigint.unserialize(big, output_type, precision)
     bigint.check(big)
+
     local num = ""
     if big.sign == "-" then
         num = "-"
     end
-    for _, digit in pairs(big.digits) do
-        num = num .. math.floor(digit) -- lazy way of getting rid of .0$
-    end
-    if as_string then
-        return num
+
+
+    if ((output_type == nil)
+    or (output_type == "number")
+    or (output_type == "n")
+    or (output_type == "string")
+    or (output_type == "s")) then
+        -- Unserialization to a string or number requires reconstructing the
+        -- entire number
+
+        for _, digit in pairs(big.digits) do
+            num = num .. math.floor(digit) -- lazy way of getting rid of .0$
+        end
+
+        if ((output_type == nil)
+        or (output_type == "number")
+        or (output_type == "n")) then
+            return tonumber(num)
+        else
+            return num
+        end
+
     else
-        return tonumber(num)
+        -- Unserialization to human-readable form or scientific notation only
+        -- requires reading the first few digits
+        if (precision == nil) then
+            precision = 3
+        else
+            assert(precision > 0, "Precision cannot be less than 1")
+            assert(math.floor(precision) == precision,
+                   "Precision must be a positive integer")
+        end
+
+        num = num .. big.digits[1]
+        if (precision > 1) then
+            num = num .. "."
+            for i = 1, (precision - 1) do
+                num = num .. big.digits[i + 1]
+            end
+        end
+
+        if ((output_type == "human-readable")
+        or (output_type == "human")
+        or (output_type == "h")) then
+            -- TODO
+            return num
+        else
+            return num .. "*10^" .. (#big.digits - 1)
+        end
+
     end
 end
 
@@ -175,8 +219,8 @@ end
 function bigint.subtract_raw(big1, big2)
     -- Type checking is done by bigint.compare
     assert(bigint.compare(bigint.abs(big1), bigint.abs(big2), ">="),
-           "Size of " .. bigint.unserialize(big1, true) .. " is less than "
-           .. bigint.unserialize(big2, true))
+           "Size of " .. bigint.unserialize(big1, "string") .. " is less than "
+           .. bigint.unserialize(big2, "string"))
 
     local result = big1:clone()
     local max_digits = #big1.digits
@@ -252,7 +296,7 @@ end
 function bigint.multiply_single(big1, big2)
     bigint.check(big1)
     bigint.check(big2)
-    assert(#big2.digits == 1, bigint.unserialize(big2)
+    assert(#big2.digits == 1, bigint.unserialize(big2, "string")
                               .. " has more than one digit")
 
     local result = bigint.new()

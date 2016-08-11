@@ -29,8 +29,8 @@ new functions or restructuring your function's flow.
 
 Functions should be set up as follows:
 
-    -- Global variables (functions with these should probably be in bigint-extra)
-    -- should be declared outside the function.
+    -- Global variables (functions with these should probably be in
+    -- bigint-extra) or constants should be declared outside the function.
 
     -- Include a brief comment about what your function does, what the types of
     -- its arguments are, and what it returns.

@@ -130,3 +130,5 @@ print("-- Generate a random negative or positive")
 demo_random(-100, 100)
 print()
 --]]
+print("-- Unserialize 1000000000000 (1 Trillion) to a human-readable string")
+print(bigint.unserialize(bigint.new(1000000000000),"human-readable"))

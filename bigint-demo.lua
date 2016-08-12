@@ -43,9 +43,9 @@ end
 
 function demo_random(n1, n2)
     if (n2) then
-        printf("bigint.random(%s, %s) -> %s", tostring(n1), tostring(n2), tostring(bigint.unserialize(bigint.random(bigint.new(n1), bigint.new(n2)), "string")))
+        printf("bigint.random(%s, %s) -> %s", tostring(n1), tostring(n2), tostring(bigint.unserialize(bigint_extra.random(bigint.new(n1), bigint.new(n2)), "string")))
     else
-        printf("bigint.random(%s) -> %s", tostring(n1), tostring(bigint.unserialize(bigint.random(bigint.new(n1)), "string")))
+        printf("bigint.random(%s) -> %s", tostring(n1), tostring(bigint.unserialize(bigint_extra.random(bigint.new(n1)), "string")))
     end
 end
 
@@ -111,6 +111,15 @@ demo_divide(math.random(-10000, 0), math.random(100))
 print("-- (Cannot demo divide by zero because of assertion failure)")
 print()
 
+print("-- Generate a random bigint between 1 and 100 with the internal PRNG")
+demo_random(100)
+print("-- Generate a random bigint between -100 and -1 with the internal PRNG")
+demo_random(-100, -1)
+demo_subtract(-100, -1)
+print("-- Generate a random bigint between -100 and 100 with the internal PRNG")
+demo_random(-100, 100)
+print()
+
 print("-- Unserialize large random number to a number")
 print(bigint.unserialize(bigint_extra.random(bigint.new("100000000000000000000000000000000000000000000000000000000000000000000")), "number"))
 print("-- Unserialize large random number to a string")
@@ -119,16 +128,4 @@ print("-- Unserialize large random number to a human-readable string")
 print(bigint.unserialize(bigint_extra.random(bigint.new("100000000000000000000000000000000000000000000000000000000000000000000")), "human-readable"))
 print("-- Unserialize large random number to a scientific notation string")
 print(bigint.unserialize(bigint_extra.random(bigint.new("100000000000000000000000000000000000000000000000000000000000000000000")), "scientific"))
---[[
-print("BUGGY RANDOM NUMBER GENERATOR")
-print("-- Generate a random positive with one argument")
-demo_random(10)
-print("-- Generate a random negative")
-demo_random(-100, -90)
-demo_subtract(-100, -90)
-print("-- Generate a random negative or positive")
-demo_random(-100, 100)
 print()
---]]
-print("-- Unserialize 1000000000000 (1 Trillion) to a human-readable string")
-print(bigint.unserialize(bigint.new(1000000000000),"human-readable"))

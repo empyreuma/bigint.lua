@@ -8,7 +8,7 @@ local strict = true
 
 local bigint = {}
 
-local magnitudes = require("ordersofmagnitude")
+local named_powers = require("named-powers-of-ten")
 
 -- Create a new bigint or convert a number or string into a big
 -- Returns an empty, positive bigint if no number or string is given
@@ -106,6 +106,8 @@ function bigint.unserialize(big, output_type, precision)
                    "Precision must be a positive integer")
         end
 
+        -- num is the first (precision + 1) digits, the first being separated by
+        -- a decimal point from the others
         num = num .. big.digits[1]
         if (precision > 1) then
             num = num .. "."
@@ -117,25 +119,29 @@ function bigint.unserialize(big, output_type, precision)
         if ((output_type == "human-readable")
         or (output_type == "human")
         or (output_type == "h")) then
-            
-            local original_number = bigint.unserialize(big,"n") or 0 -- Calling function from within itself lool spooky
-            local mag = ""
-            local numb = 0
+            -- Human-readable output contributed by 123eee555
 
-            for i = #big.digits-1 ,#big.digits-6,-1 do
-                v = magnitudes[i]
-                if v then
-                    numb = original_number/(10^(i))
-                    mag = magnitudes[i]
+            local name
+            local walkback = 0 -- Used to enumerate "ten", "hundred", etc
+
+            -- Walk backwards in the index of named_powers starting at the
+            -- number of digits of the input until the first value is found
+            for i = (#big.digits - 1), (#big.digits - 4), -1 do
+                name = named_powers[i]
+                if (name) then
+                    if (walkback == 1) then
+                        name = "ten " .. name
+                    elseif (walkback == 2) then
+                        name = "hundred " .. name
+                    end
                     break
+                else
+                    walkback = walkback + 1
                 end
             end
-                
-               
 
-            local formated_num = string.format("%0.3f",tostring(numb)).." "..mag
-            return formated_num 
-            
+            return num .. " " .. name
+
         else
             return num .. "*10^" .. (#big.digits - 1)
         end

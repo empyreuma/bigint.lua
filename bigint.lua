@@ -8,6 +8,8 @@ local strict = true
 
 local bigint = {}
 
+local magnitudes = require("ordersofmagnitude")
+
 -- Create a new bigint or convert a number or string into a big
 -- Returns an empty, positive bigint if no number or string is given
 function bigint.new(num)
@@ -115,8 +117,25 @@ function bigint.unserialize(big, output_type, precision)
         if ((output_type == "human-readable")
         or (output_type == "human")
         or (output_type == "h")) then
-            -- TODO
-            return num
+            
+            local original_number = bigint.unserialize(big,"n") or 0 -- Calling function from within itself lool spooky
+            local mag = ""
+            local numb = 0
+
+            for i = #big.digits-1 ,#big.digits-6,-1 do
+                v = magnitudes[i]
+                if v then
+                    numb = original_number/(10^(i))
+                    mag = magnitudes[i]
+                    break
+                end
+            end
+                
+               
+
+            local formated_num = string.format("%0.3f",tostring(numb)).." "..mag
+            return formated_num 
+            
         else
             return num .. "*10^" .. (#big.digits - 1)
         end

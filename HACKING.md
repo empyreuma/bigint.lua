@@ -19,13 +19,15 @@ using both spaces and tabs will be very messy.
 
 Do not use camelCase. Instead, you should use\_underscores\_for\_everything.
 
+All variables should concisely but clearly summarize what they describe.
+
 Arguments should(be, separated, by, spaces).
 
 If you are using more than 4 levels of indentation, try to see if you can
 reimplement your functionality to use less. Ways of doing that include writing
 new functions or restructuring your function's flow.
 
-# Functions
+# Function structure
 
 Functions should be set up as follows:
 

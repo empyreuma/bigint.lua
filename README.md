@@ -36,13 +36,16 @@ Supported frontend operations in bigint.lua:
     internally on all operations if the "strict" variable in bigint.lua is set
     to true (default behavior)
 * bigint.abs(bigint) - Create a new, positive bigint with the same digits
-* bigint.unserialize(bigint, string output\_type, precision) - Convert a bigint
-    into to a number or a string. By default, the bigint will be converted into
-    a number. Other possible output types are "string" (alias "s"),
-    "human-readable" (alias "human" and "h") and "scientific" (alias "sci").
-    Precision is an integer that specifies the number of digits to be displayed
-    in human-readable or scientific output.
-* bigint.compare(bigint, bigint, string comparison (see bigint.lua))
+* bigint.unserialize(bigint, output\_type, precision) - Convert a bigint into a
+    number or a string. By default, the bigint will be converted into a number.
+    output\_type is a string that changes the output of the function. Possible
+    output types  are "string" (alias "s"), "human-readable" (alias "human" and
+    "h") and "scientific" (alias "sci"). Precision is an integer that specifies
+    the number of digits to be displayed in human-readable or scientific output.
+* bigint.compare(bigint, bigint, comparison) - Compare two bigints, returning
+    true if the comparison is true. Possible comparisons are "<", ">", "==",
+    ">=", "<=", "~=" and "!=". You can also use the shell versions: "lt", "gt",
+    "eq", "ge", "le" and "ne".
 * bigint.add(bigint, bigint) - Frontend addition, accounting for signs
 * bigint.subtract(bigint, bigint) - Frontend subtraction, accounting for signs
 * bigint.multiply(bigint, bigint) - Frontend multiplication operation that
@@ -52,9 +55,9 @@ Supported frontend operations in bigint.lua:
 * bigint.divide(bigint, bigint) - Frontend division operation that accounts for
     signs and translates arguments into their absolute values for use in
     bigint.divide\_raw(), returning a result and remainder
-* bigint.modulus - Frontend for the already frontend bigint.divide() function
-    that only returns the remainder and makes sure that the remainder has the
-    same sign as the dividend, as per C standard
+* bigint.modulus(bigint, bigint) - Frontend for the already frontend
+    bigint.divide() function that only returns the remainder and makes sure that
+    the remainder has the same sign as the dividend, as per C standard
 
 Backend operations (may be useful if you need more speed):
 * bigint.add\_raw(bigint, bigint) - Backend addition operation that ignores
@@ -77,7 +80,11 @@ Supported operations in bigint-extra.lua:
 
 TODO:
 * bigint.eval - Evaluate an expression, following the order of operations
+* Serialization of scientific notation
 * Maybe some other random number generators
 
 For more detailed documentation, see bigint.lua. The operations appear in the
 order that they are listed above.
+
+CONTRIBUTIONS:
+* 123eee555 - Logic for human-readable bigint.unserialize output

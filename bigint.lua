@@ -28,6 +28,36 @@ function bigint.new(num)
         return newint
     end
 
+    setmetatable(self, {
+        __add = function(lhs, rhs)
+            return bigint.add(lhs, rhs)
+        end,
+        __unm = function()
+            if (self.sign == "+") then
+                self.sign = "-"
+            else
+                self.sign = "+"
+            end
+            return self
+        end,
+        __sub = function(lhs, rhs)
+            return bigint.subtract(lhs, rhs)
+        end,
+        __mul = function(lhs, rhs)
+            return bigint.multiply(lhs, rhs)
+        end,
+        __div = function(lhs, rhs)
+            return bigint.divide(lhs, rhs)
+        end,
+        __mod = function(lhs, rhs)
+            local result, remainder = bigint.divide(lhs, rhs)
+            return result
+        end,
+        __pow = function(lhs, rhs)
+            return bigint.exponentiate(lhs, rhs)
+        end
+    })
+
     if (num) then
         local num_string = tostring(num)
         for digit in string.gmatch(num_string, "[0-9]") do
@@ -458,7 +488,7 @@ function bigint.divide_raw(big1, big2)
                 -- Find the maximum number of divisors that fit into the
                 -- dividend
                 factor = 0
-                while (bigint.compare(divisor, dividend, "<")) do
+                while (bigint.compare(divisor, dividend, "<=")) do
                     divisor = bigint.add(divisor, big2)
                     factor = factor + 1
                 end

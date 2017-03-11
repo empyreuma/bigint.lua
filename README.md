@@ -25,6 +25,10 @@ To convert a big back into a number, use the unserialize() function:
     big = bigint.new("5880")
     bigint.unserialize(big) -> 5880
 
+Bigints can be added or subtracted using normal Lua operators:
+
+    bigint.unserialize(bigint.new(1) + bigint.new(2)) -> 3
+
 Currently, only ints are supported. Floats may be added in the future.
 
 Behavior to keep in mind:

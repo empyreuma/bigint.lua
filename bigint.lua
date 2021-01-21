@@ -50,8 +50,7 @@ function bigint.new(num)
             return bigint.divide(lhs, rhs)
         end,
         __mod = function(lhs, rhs)
-            local result, remainder = bigint.divide(lhs, rhs)
-            return result
+            return bigint.modulus(lhs, rhs)
         end,
         __pow = function(lhs, rhs)
             return bigint.exponentiate(lhs, rhs)
